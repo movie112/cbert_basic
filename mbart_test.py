@@ -5,18 +5,16 @@ import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
 from datetime import datetime
-# from transformers import MBartForConditionalGeneration, MBartConfig, MBartTokenizer # MBart50TokenizerFast, 
-
-from transformers import MBartConfig, MBart50Tokenizer
+# from transformers import MBartForConditionalGeneration, MBart50TokenizerFast, MBartConfig, MBartTokenizer
+from transformers import MBartConfig, MBartTokenizer
 from mbart_model import MBartForConditionalGeneration
 
-from nlgeval import NLGEval
+from nlgeval import NLGEval # 설치 필요
 
 from mbart_utils import set_seed, request_logger
 from mbart_preprocess import pre_data
 
 def test(model, test_loader, args, logger):
-    print("=======Testing========")
     with torch.no_grad():
 
             ref_list = []
@@ -133,7 +131,7 @@ if __name__ == '__main__':
     model.load_state_dict(torch.load(args.model_save_path))
     model = model.to(args.device)
 
-    tokenizer = MBart50Tokenizer.from_pretrained(args.model_name, src_lang=args.src_lang, tgt_lang=args.tgt_lang)
+    tokenizer = MBartTokenizer.from_pretrained(args.model_name, src_lang=args.src_lang, tgt_lang=args.tgt_lang)
 
     test_loader= pre_data(tokenizer, args, mode='test')
 
