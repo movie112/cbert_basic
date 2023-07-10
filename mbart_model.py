@@ -19,6 +19,7 @@ from transformers.modeling_outputs import (
     Seq2SeqSequenceClassifierOutput,
 )
 from transformers.modeling_utils import PreTrainedModel
+
 from transformers.utils import (
     add_code_sample_docstrings,
     add_end_docstrings,
@@ -27,19 +28,19 @@ from transformers.utils import (
     logging,
     replace_return_docstrings,
 )
-from transformers.models.mbart.configuration_mbart import MBartConfig
+from transformers import MBartConfig
 
 
 logger = logging.get_logger(__name__)
 
-_CHECKPOINT_FOR_DOC = "facebook/mbart-large-cc25"
+_CHECKPOINT_FOR_DOC = "facebook/mbart-large-50"
 _CONFIG_FOR_DOC = "MBartConfig"
 
 # Base model docstring
 _EXPECTED_OUTPUT_SHAPE = [1, 8, 1024]
 
 MBART_PRETRAINED_MODEL_ARCHIVE_LIST = [
-    "facebook/mbart-large-cc25",
+    "facebook/mbart-large-50",
     # See all MBART models at https://huggingface.co/models?filter=mbart
 ]
 
@@ -382,24 +383,6 @@ class MBartDecoderLayer(nn.Module):
         output_attentions: Optional[bool] = False,
         use_cache: Optional[bool] = True,
     ) -> torch.Tensor:
-        """
-        Args:
-            hidden_states (`torch.FloatTensor`): input to the layer of shape `(batch, seq_len, embed_dim)`
-            attention_mask (`torch.FloatTensor`): attention mask of size
-                `(batch, 1, tgt_len, src_len)` where padding elements are indicated by very large negative values.
-            encoder_hidden_states (`torch.FloatTensor`):
-                cross attention input to the layer of shape `(batch, seq_len, embed_dim)`
-            encoder_attention_mask (`torch.FloatTensor`): encoder attention mask of size
-                `(batch, 1, tgt_len, src_len)` where padding elements are indicated by very large negative values.
-            layer_head_mask (`torch.FloatTensor`): mask for attention heads in a given layer of size
-                `(encoder_attention_heads,)`.
-            cross_attn_layer_head_mask (`torch.FloatTensor`): mask for cross-attention heads in a given layer of
-                size `(decoder_attention_heads,)`.
-            past_key_value (`Tuple(torch.FloatTensor)`): cached past key and value projection states
-            output_attentions (`bool`, *optional*):
-                Whether or not to return the attentions tensors of all attention layers. See `attentions` under
-                returned tensors for more detail.
-        """
         residual = hidden_states
         hidden_states = self.self_attn_layer_norm(hidden_states)
 
@@ -458,31 +441,6 @@ class MBartDecoderLayer(nn.Module):
             outputs += (present_key_value,)
 
         return outputs
-
-
-# Copied from transformers.models.bart.modeling_bart.BartClassificationHead with Bart->MBart
-class MBartClassificationHead(nn.Module):
-    """Head for sentence-level classification tasks."""
-
-    def __init__(
-        self,
-        input_dim: int,
-        inner_dim: int,
-        num_classes: int,
-        pooler_dropout: float,
-    ):
-        super().__init__()
-        self.dense = nn.Linear(input_dim, inner_dim)
-        self.dropout = nn.Dropout(p=pooler_dropout)
-        self.out_proj = nn.Linear(inner_dim, num_classes)
-
-    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
-        hidden_states = self.dropout(hidden_states)
-        hidden_states = self.dense(hidden_states)
-        hidden_states = torch.tanh(hidden_states)
-        hidden_states = self.dropout(hidden_states)
-        hidden_states = self.out_proj(hidden_states)
-        return hidden_states
 
 
 class MBartPreTrainedModel(PreTrainedModel):
@@ -1201,6 +1159,7 @@ class MBartModel(MBartPreTrainedModel):
         if decoder_input_ids is None and decoder_inputs_embeds is None:
             decoder_input_ids = shift_tokens_right(input_ids, self.config.pad_token_id)
 
+        ######## ENCODER outputs ########
         if encoder_outputs is None:
             encoder_outputs = self.encoder(
                 input_ids=input_ids,
@@ -1223,7 +1182,7 @@ class MBartModel(MBartPreTrainedModel):
         decoder_outputs = self.decoder(
             input_ids=decoder_input_ids,
             attention_mask=decoder_attention_mask,
-            encoder_hidden_states=encoder_outputs[0],
+            encoder_hidden_states=encoder_outputs[0], ######## ENOCODER OUTPUTS ########
             encoder_attention_mask=attention_mask,
             head_mask=decoder_head_mask,
             cross_attn_head_mask=cross_attn_head_mask,
