@@ -4,9 +4,8 @@ import argparse
 import numpy as np
 from tqdm.auto import tqdm
 from datetime import datetime
-# from transformers import MBartForConditionalGeneration, MBartConfig, MBartTokenizer # MBart50TokenizerFast, 
-
-from transformers import MBartConfig, MBart50Tokenizer
+# from transformers import MBartForConditionalGeneration, MBart50TokenizerFast, MBartConfig, MBartTokenizer
+from transformers import MBartConfig, MBartTokenizer
 from mbart_model import MBartForConditionalGeneration
 
 from mbart_utils import set_seed, get_scheduler, get_optimizer, request_logger
@@ -58,8 +57,7 @@ def train(model, train_loader, valid_loader, args, logger):
                     bar.set_description(f"loss: {avg_loss/100:.5f}, epoch: {epoch + 1}")
                     print('')
                     avg_loss =0 
-            print(f"epoch_loss: {sum(total_val_loss)/len(total_val_loss)}")
-            logger.info(f"epoch_loss: {sum(total_val_loss)/len(total_val_loss)}")
+
             if best_epoch_loss > sum(total_val_loss)/len(total_val_loss):
                 best_epoch_loss = sum(total_val_loss)/len(total_val_loss)
                 torch.save(model.state_dict(), os.path.join(args.model_save_dir, 'best_model.pt'))#.format(os.path.basename(os.path.normpath(args.model_save_dir))))) # en_de_data
@@ -113,7 +111,7 @@ if __name__ == '__main__':
     model = MBartForConditionalGeneration(config)
     model = model.to(args.device)
 
-    tokenizer = MBart50Tokenizer.from_pretrained(args.model_name, src_lang=args.src_lang, tgt_lang=args.tgt_lang)
+    tokenizer = MBartTokenizer.from_pretrained(args.model_name, src_lang=args.src_lang, tgt_lang=args.tgt_lang)
 
     train_loader = pre_data(tokenizer, args, mode='train')
     valid_loader = pre_data(tokenizer, args, mode='val')
