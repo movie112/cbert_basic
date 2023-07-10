@@ -77,4 +77,3 @@ def make_tsv(dir, save_dir, names):
 
 if __name__ == '__main__':
    make_tsv('/HDD/dataset/WMT/2016/multi_modal', './en_de_data', ['en', 'de'])
-
