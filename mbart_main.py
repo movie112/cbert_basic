@@ -11,7 +11,8 @@ if __name__ == '__main__':
               --tgt_lang de_DE \
               --logger mbart_train \
               --logger_path ./en_de_data/mbart_train.log \
-              --device cuda:0")
+              --model_name facebook/mbart-large-cc25 \
+              --device cuda:1")
     
     os.system("python mbart_test.py \
               --batch_size 16 \
@@ -22,4 +23,5 @@ if __name__ == '__main__':
               --tgt_lang de_DE \
               --logger mbart_test \
               --logger_path ./en_de_data/mbart_test.log \
-              --device cuda:0")
+              --model_name facebook/mbart-large-cc25 \
+              --device cuda:1")
